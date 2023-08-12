@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:status0/login.dart';
 
 class Intropage extends StatelessWidget {
   const Intropage({super.key});
@@ -51,7 +52,12 @@ class Intropage extends StatelessWidget {
               width: 120,
             ),
             const Text("ALready Have an Account?"),
-            TextButton(onPressed: () {}, child: const Text("Login"))
+            TextButton(
+                onPressed: () {
+                  Navigator.push(context,
+                      MaterialPageRoute(builder: (context) => Login()));
+                },
+                child: const Text("Login"))
           ],
         )
       ]),
