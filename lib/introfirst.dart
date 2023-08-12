@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:status0/GetStarted.dart';
+//import 'package:status0/GetStarted.dart';
 import 'package:status0/login.dart';
 
 class Intropage extends StatelessWidget {
@@ -28,7 +30,10 @@ class Intropage extends StatelessWidget {
           height: 500,
         ),
         ElevatedButton(
-          onPressed: () {},
+          onPressed: () {
+            Navigator.push(
+                context, MaterialPageRoute(builder: (context) => GetStarted()));
+          },
           style: ElevatedButton.styleFrom(
               side: const BorderSide(color: Colors.black),
               padding:

@@ -5,7 +5,9 @@ import 'package:http/http.dart' as http;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class Login extends StatefulWidget {
-  const Login({super.key});
+  Login({super.key, this.Password, this.username});
+  String? username;
+  String? Password;
   State<Login> createState() {
     return _LoginScreenState();
   }
@@ -50,9 +52,9 @@ class _LoginScreenState extends State<Login> {
         setState(() {
           _errorMessage = '';
         });
-        Navigator.push(
-          context,
-        );
+        // Navigator.push(
+        //   context,
+        // );
       } else {
         print('Request failed with status: ${response.statusCode}.');
         print('Response data: ${response.body}.');
