@@ -1,57 +1,89 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class Login extends StatefulWidget {
   const Login({super.key});
   State<Login> createState() {
-    return _LoginSate();
+    return _LoginScreenState();
   }
 }
 
-class _LoginSate extends State<Login> {
-  final TextEditingController _usernamecontroller = TextEditingController();
-  final TextEditingController _passwordcontroller = TextEditingController();
-  void onpressed(BuildContext context) async {
-    String enteredUsername = _usernamecontroller.text;
-    String enteredPassword = _passwordcontroller.text;
+class _LoginScreenState extends State<Login> {
+  final TextEditingController _usernameController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  final storage = FlutterSecureStorage();
 
-    // Define the URL where you want to send the request
-    final url = Uri.parse('<url>');
+  String _errorMessage = '';
 
-    // Create a Map representing the data you want to send
-    final data = {
-      'username': enteredUsername,
-      'password': enteredPassword,
+  Future<void> onPressed() async {
+    var url = Uri.http('10.50.6.191:5000', '/login');
+    final Map<String, dynamic> jsonData = {
+      'username': _usernameController.text,
+      'password': _passwordController.text,
     };
 
-    // Send the POST request
-    final response = await http.post(url, body: data);
+    try {
+      var response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode(jsonData),
+      );
 
-    // Check the response and handle accordingly
-    if (response.statusCode == 200) {
-      // Request was successful, do something with the response data
-    } else {
-      // Request failed, handle the error
+      if (response.statusCode == 200) {
+        var jsonResponse = json.decode(response.body) as Map<String, dynamic>;
+        var itemCount = jsonResponse['totalItems'];
+        print('Number of items: $itemCount.');
+
+        // Store tokens
+        String accessToken = jsonResponse['access_token'];
+        String refreshToken = jsonResponse['refresh_token'];
+        await storage.write(key: 'access_token', value: accessToken);
+        await storage.write(key: 'refresh_token', value: refreshToken);
+
+        print('Access Token: $accessToken');
+        print('Refresh Token: $refreshToken');
+
+        // Clear any previous error message
+        setState(() {
+          _errorMessage = '';
+        });
+        Navigator.push(
+          context,
+        );
+      } else {
+        print('Request failed with status: ${response.statusCode}.');
+        print('Response data: ${response.body}.');
+
+        // Display error message for incorrect credentials
+        setState(() {
+          _errorMessage = 'Incorrect username or password';
+        });
+      }
+    } catch (error) {
+      print('Error sending request: $error');
     }
   }
 
   @override
-  Widget build(context) {
+  Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      body: Column(children: [
-        const SizedBox(
-          height: 300,
-        ),
-        Container(
+      body: Column(
+        children: [
+          const SizedBox(
+            height: 300,
+          ),
+          Container(
             width: 300,
             child: Column(
-              //crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Padding(
                   padding: const EdgeInsets.fromLTRB(60, 0, 0, 20),
                   child: TextField(
-                    controller: _usernamecontroller,
+                    controller: _usernameController,
                     decoration: const InputDecoration(
                       border: OutlineInputBorder(),
                       labelText: 'Email',
@@ -63,7 +95,7 @@ class _LoginSate extends State<Login> {
                 Padding(
                   padding: const EdgeInsets.fromLTRB(60, 0, 0, 10),
                   child: TextField(
-                    controller: _passwordcontroller,
+                    controller: _passwordController,
                     decoration: const InputDecoration(
                       border: OutlineInputBorder(),
                       labelText: 'Password',
@@ -72,10 +104,23 @@ class _LoginSate extends State<Login> {
                     autofocus: false,
                   ),
                 ),
-                ElevatedButton(onPressed: () {}, child: const Text('Login'))
+                ElevatedButton(
+                  onPressed: onPressed,
+                  child: const Text('Login'),
+                ),
+                if (_errorMessage.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Text(
+                      _errorMessage,
+                      style: TextStyle(color: Colors.red),
+                    ),
+                  ),
               ],
-            ))
-      ]),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

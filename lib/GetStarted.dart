@@ -16,7 +16,13 @@ class Signup extends StatelessWidget {
   Widget build(context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      body: Column(),
+      body: Column(
+        children: [
+          const SizedBox(
+            height: 100,
+          ),
+        ],
+      ),
     );
   }
 }
